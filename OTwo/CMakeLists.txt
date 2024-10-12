@@ -3,7 +3,7 @@
 #
 
 # Add source to this project's executable.
-add_executable (OTwo "OTwo.cpp" )
+add_executable (OTwo "OTwo.cpp" "memory.h" "memory.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET OTwo PROPERTY CXX_STANDARD 23)
