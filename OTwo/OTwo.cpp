@@ -13,7 +13,7 @@ public:
 	CPU(Memory* memory)
 		:memory(memory)
 	{
-		Reset();
+		PC = 0x8000;
 	}
 
 	~CPU()
@@ -292,8 +292,411 @@ public:
 		PC++;
 	}
 
+	void WriteZPLastPC(uint8_t value)
+	{
+		// we move back one place to get the zp address from instruction stream
+		memory->WriteByte(memory->ReadByte(PC - 1), value);
+	}
+
+	void WriteZPXLastPC(uint8_t value)
+	{
+		// we move back one place to get the zp address from instruction stream
+		memory->WriteByte(memory->ReadByte(PC - 1) + X, value);
+	}
+
+	void WriteAbsoluteLastPC(uint8_t value)
+	{
+		memory->WriteByte(memory->ReadWord(PC - 2), value);
+	}
+
+	void WriteAbsoluteXLastPC(uint8_t value)
+	{
+		memory->WriteByte(memory->ReadWord(PC - 2) + X, value);
+	}
+
+	void ASL(uint8_t itx)
+	{
+		uint8_t _val = 0;
+		uint8_t val = 0;
+		switch (itx) {
+		case ASL_ACC:
+		{
+			_val = A;
+			val = _val << 1;
+			A = val;
+		}
+		break;
+		case ASL_ZP:
+		{
+			_val = FetchByteZP();
+			val = _val << 1;
+			WriteZPLastPC(val);
+		}break;
+		case ASL_ZPX: {
+			_val = FetchByteZPX();
+			val = _val << 1;
+			WriteZPXLastPC(val);
+		}break;
+		case ASL_ABS:
+		{
+			_val = FetchByteAbsolute();
+			val = _val << 1;
+			WriteAbsoluteLastPC(val);
+		}break;
+		case ASL_ABSX:
+		{
+			_val = FetchByteAbsoluteX();
+			val = _val << 1;
+			WriteAbsoluteXLastPC(val);
+		}break;
+		}
+
+		C = (_val & 0b10000000) ? 1 : 0;
+		N = (val & 0b10000000) ? 1 : 0;
+		Z = (val == 0) ? 1 : 0;
+	}
+
+	void LSR(uint8_t itx)
+	{
+		uint8_t _val = 0;
+		uint8_t val = 0;
+		switch (itx) {
+		case LSR_ACC:
+		{
+			_val = A;
+			val = _val >> 1;
+			A = val;
+		}
+		break;
+		case LSR_ZP:
+		{
+			_val = FetchByteZP();
+			val = _val >> 1;
+			WriteZPLastPC(val);
+		}break;
+		case LSR_ZPX: {
+			_val = FetchByteZPX();
+			val = _val >> 1;
+			WriteZPXLastPC(val);
+		}break;
+		case LSR_ABS:
+		{
+			_val = FetchByteAbsolute();
+			val = _val >> 1;
+			WriteAbsoluteLastPC(val);
+		}break;
+		case LSR_ABSX:
+		{
+			_val = FetchByteAbsoluteX();
+			val = _val >> 1;
+			WriteAbsoluteXLastPC(val);
+		}break;
+		}
+
+		C = (_val & 0b00000001) ? 1 : 0;
+		N = 0;
+		Z = (val == 0) ? 1 : 0;
+	}
+
+
+
+	void ROL(uint8_t itx)
+	{
+		uint8_t _val = 0;
+		uint8_t val = 0;
+		switch (itx) {
+		case ROL_ACC:
+		{
+			_val = A;
+			val = (_val << 1) | C;
+			A = val;
+		}
+		break;
+		case ROL_ZP:
+		{
+			_val = FetchByteZP();
+			val = (_val << 1) | C;
+			WriteZPLastPC(val);
+		}break;
+		case ROL_ZPX: {
+			_val = FetchByteZPX();
+			val = (_val << 1) | C;
+			WriteZPXLastPC(val);
+		}break;
+		case ROL_ABS:
+		{
+			_val = FetchByteAbsolute();
+			val = (_val << 1) | C;
+			WriteAbsoluteLastPC(val);
+		}break;
+		case ROL_ABSX:
+		{
+			_val = FetchByteAbsoluteX();
+			val = (_val << 1) | C;
+			WriteAbsoluteXLastPC(val);
+		}break;
+		}
+
+		C = (_val & 0b10000000) ? 1 : 0;
+		N = (val & 0b10000000) ? 1 : 0;
+		Z = (val == 0) ? 1 : 0;
+	}
+
+	void ROR(uint8_t itx)
+	{
+		uint8_t _val = 0;
+		uint8_t val = 0;
+		switch (itx) {
+		case ROR_ACC:
+		{
+			_val = A;
+			val = (_val >> 1) | (C << 7);
+			A = val;
+		}
+		break;
+		case ROR_ZP:
+		{
+			_val = FetchByteZP();
+			val = (_val >> 1) | (C << 7);
+			WriteZPLastPC(val);
+		}break;
+		case ROR_ZPX: {
+			_val = FetchByteZPX();
+			val = (_val >> 1) | (C << 7);
+			WriteZPXLastPC(val);
+		}break;
+		case ROR_ABS:
+		{
+			_val = FetchByteAbsolute();
+			val = (_val >> 1) | (C << 7);
+			WriteAbsoluteLastPC(val);
+		}break;
+		case ROR_ABSX:
+		{
+			_val = FetchByteAbsoluteX();
+			val = (_val >> 1) | (C << 7);
+			WriteAbsoluteXLastPC(val);
+		}break;
+		}
+
+		C = (_val & 0b00000001) ? 1 : 0;
+		N = (val & 0b10000000) ? 1 : 0;
+		Z = (val == 0) ? 1 : 0;
+	}
+
+	void PLP()
+	{
+		uint8_t P = StackPop();
+		C = (P & 0b00000001) == 1 ? 1 : 0;
+		Z = (P & 0b00000010) == 1 ? 1 : 0;
+		I = (P & 0b00000100) == 1 ? 1 : 0;
+		D = (P & 0b00001000) == 1 ? 1 : 0;
+		B = (P & 0b00010000) == 1 ? 1 : 0;
+		V = (P & 0b01000000) == 1 ? 1 : 0;
+		N = (P & 0b10000000) == 1 ? 1 : 0;
+		PC++;
+	}
+
+	void PLA()
+	{
+		auto _A = StackPop();
+		A = _A;
+		Z = (A == 0) ? 1 : 0;
+		N = (A & 0b10000000) ? 1 : 0;
+	}
+
+
+	void BCC()
+	{
+		if (C == 0)
+		{
+			int8_t rel_offset = (int8_t)FetchByte();
+			PC += rel_offset;
+		}
+	}
+
+	void BCS()
+	{
+		if (C == 1)
+		{
+			int8_t rel_offset = (int8_t)FetchByte();
+			PC += rel_offset;
+		}
+	}
+
+	void BEQ()
+	{
+		if (Z == 1)
+		{
+			int8_t rel_offset = (int8_t)FetchByte();
+			PC += rel_offset;
+		}
+	}
+
+	void BNE()
+	{
+		if (Z == 0)
+		{
+			int8_t rel_offset = (int8_t)FetchByte();
+			PC += rel_offset;
+		}
+	}
+
+	void BPL()
+	{
+		if (N == 0)
+		{
+			int8_t rel_offset = (int8_t)FetchByte();
+			PC += rel_offset;
+		}
+	}
+
+	void BMI()
+	{
+		if (N == 1)
+		{
+			int8_t rel_offset = (int8_t)FetchByte();
+			PC += rel_offset;
+		}
+	}
+
+	void BVC()
+	{
+		if (V == 0)
+		{
+			int8_t rel_offset = (int8_t)FetchByte();
+			PC += rel_offset;
+		}
+	}
+
+	void BVS()
+	{
+		if (V == 1)
+		{
+			int8_t rel_offset = (int8_t)FetchByte();
+			PC += rel_offset;
+		}
+	}
+
+	void BIT(uint8_t itx)
+	{
+		uint8_t val = 0;
+		switch (itx)
+		{
+		case BIT_ZP: val = FetchByteZP(); break;
+		case BIT_ABS: val = FetchByteAbsolute(); break;
+		}
+
+		Z = ((val & A) == 0) ? 1 : 0;
+		N = (val & 0b10000000) ? 1 : 0;
+		V = (val & 0b01000000) ? 1 : 0;
+	}
+
+	void BRK()
+	{
+		uint8_t pclo = PC & 0xFF;
+		uint8_t pchi = PC >> 8;
+		StackPush(pchi);
+		StackPush(pclo);
+		uint8_t P = 0;
+		P |= C ? 0b00000001 : 0;
+		P |= Z ? 0b00000010 : 0;
+		P |= I ? 0b00000100 : 0;
+		P |= D ? 0b00001000 : 0;
+		P |= B ? 0b00010000 : 0;
+		P |= V ? 0b01000000 : 0;
+		P |= N ? 0b10000000 : 0;
+		StackPush(P);
+		PC = memory->ReadWord(0xFFFE);
+		B = 1;
+	}
+
+	void CMP(uint8_t itx)
+	{
+		uint8_t val = 0;
+		switch (itx)
+		{
+		case CMP_IMM: val = FetchByte(); break;
+		case CMP_ZP: val = FetchByteZP(); break;
+		case CMP_ZPX: val = FetchByteZPX(); break;
+		case CMP_ABS: val = FetchByteAbsolute(); break;
+		case CMP_ABSX: val = FetchByteAbsoluteX(); break;
+		case CMP_ABSY: val = FetchByteAbsoluteY(); break;
+		case CMP_INDX: val = FetchByteIndirectX(); break;
+		case CMP_INDY: val = FetchByteIndirectY(); break;
+		}
+
+		Z = (A == val) ? 1 : 0;
+		C = (A >= val) ? 1 : 0;
+		N = ((A - val) & 0b10000000) ? 1 : 0;
+	}
+
+	void CPX(uint8_t itx)
+	{
+		uint8_t val = 0;
+		switch (itx)
+		{
+		case CPX_IMM: val = FetchByte(); break;
+		case CPX_ZP: val = FetchByteZP(); break;
+		case CPX_ABS: val = FetchByteAbsolute(); break;
+		}
+
+		Z = (X == val) ? 1 : 0;
+		C = (X >= val) ? 1 : 0;
+		N = ((X - val) & 0b10000000) ? 1 : 0;
+	}
+
+	void CPY(uint8_t itx)
+	{
+		uint8_t val = 0;
+		switch (itx)
+		{
+		case CPY_IMM: val = FetchByte(); break;
+		case CPY_ZP: val = FetchByteZP(); break;
+		case CPY_ABS: val = FetchByteAbsolute(); break;
+		}
+
+		Z = (Y == val) ? 1 : 0;
+		C = (Y >= val) ? 1 : 0;
+		N = ((Y - val) & 0b10000000) ? 1 : 0;
+	}
+
+	void DEC(uint8_t itx) 
+	{
+		uint8_t val = 0;
+		switch (itx)
+		{
+		case DEC_ZP:
+		{
+			val = FetchByteZP() - 1;
+			WriteZPLastPC(val);
+		}break;
+		case DEC_ZPX:
+		{
+			val = FetchByteZPX() - 1;
+			WriteZPXLastPC(val);
+		}break;
+		case DEC_ABS:
+		{
+			val = FetchByteAbsolute() - 1;
+			WriteAbsoluteLastPC(val);
+		}break;
+		case DEC_ABSX:
+		{
+			val = FetchByteAbsoluteX() - 1;
+			WriteAbsoluteXLastPC(val);
+		}break;
+
+		}
+
+		Z = (val == 0) ? 1 : 0;
+		N = (val & 0b10000000) ? 1 : 0;
+	}
+
 	void Run()
 	{
+		PC = 0xFF;
+
 		while (true)
 		{
 			auto itx = FetchInstruction();
@@ -386,6 +789,122 @@ public:
 			case PHP_IMP:
 				PHP();
 				break;
+
+			case PLA_IMP:
+				PLA();
+				break;
+
+			case PLP_IMP:
+				PLP();
+				break;
+
+			case ASL_ACC:
+			case ASL_ZP:
+			case ASL_ZPX:
+			case ASL_ABS:
+			case ASL_ABSX:
+				ASL(itx);
+				break;
+
+			case LSR_ACC:
+			case LSR_ZP:
+			case LSR_ZPX:
+			case LSR_ABS:
+			case LSR_ABSX:
+				LSR(itx);
+				break;
+
+			case ROL_ACC:
+			case ROL_ZP:
+			case ROL_ZPX:
+			case ROL_ABS:
+			case ROL_ABSX:
+				ROL(itx);
+				break;
+			case ROR_ACC:
+			case ROR_ZP:
+			case ROR_ZPX:
+			case ROR_ABS:
+			case ROR_ABSX:
+				ROR(itx);
+				break;
+
+			case BCC_REL:
+				BCC();
+				break;
+
+			case BCS_REL:
+				BCS();
+				break;
+
+			case BEQ_REL:
+				BEQ();
+				break;
+
+			case BNE_REL:
+				BNE();
+				break;
+
+			case BMI_REL:
+				BMI();
+				break;
+
+			case BPL_REL:
+				BPL();
+				break;
+
+			case BVC_REL:
+				BVC();
+				break;
+
+			case BVS_REL:
+				BVS();
+				break;
+
+			case BIT_ZP:
+			case BIT_ABS:
+				BIT(itx);
+				break;
+
+			case BRK_IMP:
+				BRK();
+				break;
+
+			case CLC_IMP: C = 0; break;
+			case CLD_IMP: D = 0; break;
+			case CLI_IMP: I = 0; break;
+			case CLV_IMP: V = 0; break;
+
+			case CMP_IMM:
+			case CMP_ZP:
+			case CMP_ZPX:
+			case CMP_ABS:
+			case CMP_ABSX:
+			case CMP_ABSY:
+			case CMP_INDX:
+			case CMP_INDY:
+				CMP(itx);
+				break;
+
+			case CPX_IMM:
+			case CPX_ZP:
+			case CPX_ABS:
+				CPX(itx);
+				break;
+
+			case CPY_IMM:
+			case CPY_ZP:
+			case CPY_ABS:
+				CPY(itx);
+				break;
+
+			case DEC_ZP:
+			case DEC_ZPX:
+			case DEC_ABS:
+			case DEC_ABSX:
+				DEC(itx);
+				break;
+
 			default:
 				std::cout << "Unknown instruction : " << std::hex << itx << std::endl;
 				break;
@@ -413,11 +932,11 @@ private:
 int main(int argc, char** argv)
 {
 	Memory memory;
-	if(!memory.LoadFromFile("6502_functional_test.bin"))
-	{
-		std::cout << "Failed to load memory" << std::endl;
-		return 1;
-	}
+	//if (!memory.LoadFromFile("6502_functional_test.bin"))
+	//{
+	//	std::cout << "Failed to load memory" << std::endl;
+	//	return 1;
+	//}
 
 	//int i = 0;
 	//memory.WriteByte(0xFF + i++, LDA_IMM);

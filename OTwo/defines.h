@@ -66,8 +66,8 @@
 #define BCC_REL  0x90
 #define BCS_REL  0xB0
 #define BEQ_REL  0xF0
-#define BMI_REL  0x30
 #define BNE_REL  0xD0
+#define BMI_REL  0x30
 #define BPL_REL  0x10
 #define BVC_REL  0x50
 #define BVS_REL  0x70
@@ -86,3 +86,55 @@
 
 #define JMP_ABS 0x4C
 #define JMP_IND 0x6C
+
+#define ASL_ACC  0x0A
+#define ASL_ZP	 0x06
+#define ASL_ZPX  0x16
+#define ASL_ABS  0x0E
+#define ASL_ABSX 0x1E
+
+#define LSR_ACC  0x4A
+#define LSR_ZP	 0x46
+#define LSR_ZPX  0x56
+#define LSR_ABS  0x4E
+#define LSR_ABSX 0x5E
+
+#define ROL_ACC  0x2A
+#define ROL_ZP	 0x26
+#define ROL_ZPX  0x36
+#define ROL_ABS  0x2E
+#define ROL_ABSX 0x3E
+
+#define ROR_ACC  0x6A
+#define ROR_ZP	 0x66
+#define ROR_ZPX  0x76
+#define ROR_ABS  0x6E
+#define ROR_ABSX 0x7E
+
+#define CLC_IMP  0x18
+#define CLD_IMP  0xD8
+#define CLI_IMP  0x58
+#define CLV_IMP  0xB8
+
+#define CMP_IMM  0xC9
+#define CMP_ZP	 0xC5
+#define CMP_ZPX  0xD5
+#define CMP_ABS  0xCD
+#define CMP_ABSX 0xDD
+#define CMP_ABSY 0xD9
+#define CMP_INDX 0xC1
+#define CMP_INDY 0xD1
+
+#define CPX_IMM  0xE0
+#define CPX_ZP	 0xE4
+#define CPX_ABS  0xEC
+
+#define CPY_IMM  0xC0
+#define CPY_ZP	 0xC4
+#define CPY_ABS  0xCC
+
+#define DEC_ZP	 0xC6
+#define DEC_ZPX	 0xD6
+#define DEC_ABS  0xCE
+#define DEC_ABSX 0xDE
+
