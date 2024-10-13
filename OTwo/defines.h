@@ -9,6 +9,15 @@
 #define ADC_INDX 0x61
 #define ADC_INDY 0x71
 
+#define SBC_IMM  0xE9
+#define SBC_ZP	 0xE5
+#define SBC_ZPX  0xF5
+#define SBC_ABS  0xED
+#define SBC_ABSX 0xFD
+#define SBC_ABSY 0xF9
+#define SBC_INDX 0xE1
+#define SBC_INDY 0xF1
+
 #define LDA_IMM  0xA9
 #define LDA_ZP	 0xA5
 #define LDA_ZPX  0xB5
@@ -56,12 +65,6 @@
 #define EOR_ABSY 0x59
 #define EOR_INDX 0x41
 #define EOR_INDY 0x51
-
-#define ASL_ACC  0x0A
-#define ASL_ZP	 0x06
-#define ASL_ZPX  0x16
-#define ASL_ABS  0x0E
-#define ASL_ABSX 0x1E
 
 #define BCC_REL  0x90
 #define BCS_REL  0xB0
@@ -137,4 +140,46 @@
 #define DEC_ZPX	 0xD6
 #define DEC_ABS  0xCE
 #define DEC_ABSX 0xDE
+
+#define DEX_IMP  0xCA
+#define DEY_IMP  0x88
+
+#define INC_ZP	 0xE6
+#define INC_ZPX	 0xF6
+#define INC_ABS  0xEE
+#define INC_ABSX 0xFE
+
+#define INX_IMP  0xE8
+#define INY_IMP  0xC8
+
+#define JSR_ABS 0x20
+#define RTS_IMP 0x60
+#define RTI_IMP 0x40
+
+#define SEC_IMP  0x38
+#define SED_IMP  0xF8
+#define SEI_IMP  0x78
+
+#define STA_ZP	 0x85
+#define STA_ZPX  0x95
+#define STA_ABS  0x8D
+#define STA_ABSX 0x9D
+#define STA_ABSY 0x99
+#define STA_INDX 0x81
+#define STA_INDY 0x91
+
+#define STX_ZP	 0x86
+#define STX_ZPY  0x96
+#define STX_ABS  0x8E
+
+#define STY_ZP	 0x84
+#define STY_ZPX  0x94
+#define STY_ABS  0x8C
+
+#define TAX_IMP  0xAA
+#define TAY_IMP  0xA8
+#define TSX_IMP  0xBA
+#define TXA_IMP  0x8A
+#define TXS_IMP  0x9A
+#define TYA_IMP  0x98
 
